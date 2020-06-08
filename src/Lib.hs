@@ -77,8 +77,8 @@ tocar festival banda  = (genero banda) festival
 {-Definir la función suceder, que hace que suceda un festival. El resultado debe ser el mismo festival pero 
 con el público en su situación final, luego de haber tocado todas las bandas. -}
 
-suceder :: Festival -> [Banda] -> Festival
-suceder festival bandas = foldl tocar festival bandas
+suceder :: Festival ->  Festival
+suceder festival = foldl tocar festival (bandas festival)
 
 {-Se conocen ciertos criterios de clasificación de bandas, de los cuales depende su popularidad. Por ejemplo:
 Vendida: Debe tener tres o más descripciones o bien una descripción que sea “vendida”. 
@@ -134,5 +134,30 @@ popularidad banda  = (*100).fromIntegral.length.(clasificarBanda banda)
 Esto sucede cuando cronológicamente cada banda es más popular que la anterior, 
 y además la popularidad total (la popularidad acumulada de sus bandas) supera los 1000 puntos-}
 
+
+buenFest :: Festival -> [Clasificacion] -> Bool
+buenFest festival clasificaciones = sum (popularidades festival clasificaciones) > 1000 && crecePupularidad (popularidades festival clasificaciones)
+
+popularidades :: Festival -> [Clasificacion] -> [Float]
+popularidades festival clasificaciones = map (flip popularidad clasificaciones) (bandas festival)
+
+crecePupularidad :: [Float] -> Bool
+crecePupularidad [_] = True
+crecePupularidad (banda1: banda2:restoBandas)
+    | banda1 >= banda2 = False
+    |otherwise = crecePupularidad (banda2:restoBandas)
+
+{-¿Fueron de utilidad los conceptos de aplicación parcial y composición? Indicar donde se los utilizó y 
+justificar su impacto en la solución.
+
+¿Sería posible que alguna de las listas fuera infinita y de 
+todas maneras las funciones sigan funcionando correctamente? Justificar y ejemplificar.
+La funcion popularidad, por ejemplo, dejaría de funcionar ya que para arrojar un resultado necesita calcular primero el largo de 
+toda la lista. Habría que agregarle que calcule el largo de los primeros n elementos y en ese caso sí funcionaría (gracias a Lazy evaluation)
+Otra opcion sería sacar el largo de los que cumplan cierta condicion de esa lista infinita (Pero esto sólo funcionaría si 
+existe al menos 1 elemnto que cumpla tal condición, sino seguirá evaluando infinitamente.
+en CrecePopularidad ocurre lo mismo, evalua infinitamente ya que su caso base es una lista de 1 solo elemnto. Al igual 
+ocurre con legendaria y vendida, que utilizan la funcion elem, si algún elemtno cumple la condicion me devuelve algo, sino, evalua infinitamente,
+en todos casos la sugerencia de solución es la misma: Modificar las funciones y agregar funciones como take o filter que trabajen como lazy evaluation-}
 
 
